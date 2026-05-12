@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Painel de Pedidos - Sorveteria Delícia</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'menta-claro': '#BCE7DD',
+                        'menta-escuro': '#8CD3C2',
+                        'menta-texto': '#5BAA97'
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'ui-sans-serif', 'system-ui', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; background-color: #f9fafb; }
+        .card-shadow { box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03); }
+    </style>
+</head>
+<body class="text-gray-800 h-screen flex flex-col">
+
+    <header class="bg-white shadow-sm border-b border-gray-100 py-4 px-8 flex justify-between items-center">
+        <div class="flex items-center gap-3">
+            <svg class="w-8 h-8 text-menta-escuro" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 11c0 3.517-1.009 6.799-2.753 9.571m-3.44-2.04l.054-.09A13.916 13.916 0 008 11M4 11c0-4.418 3.582-8 8-8s8 3.582 8 8m-8 11c1.744-2.772 2.753-6.054 2.753-9.571m3.44-2.04l-.054-.09A13.916 13.916 0 0116 11m-4 11v-3m-4 3v-3m8 3v-3"></path></svg>
+            <div>
+                <h1 class="text-xl font-bold text-gray-800">Sorveteria Delícia</h1>
+                <p class="text-xs text-gray-500">Gestor de Pedidos</p>
+            </div>
+        </div>
+        <div class="flex items-center gap-4">
+            <span class="flex items-center gap-2 text-sm font-semibold text-gray-600">
+                <span class="w-3 h-3 rounded-full bg-green-500 animate-pulse"></span>
+                Loja Aberta
+            </span>
+        </div>
+    </header>
+
+    <main class="flex-1 overflow-y-auto p-8">
+        <div class="max-w-7xl mx-auto">
+            
+            <div class="flex justify-between items-center mb-8">
+                <h2 class="text-2xl font-bold">Pedidos em Andamento</h2>
+                
+                <div class="flex gap-2">
+                    <button class="px-4 py-2 bg-gray-800 text-white rounded-full text-sm font-semibold">Todos</button>
+                    <button class="px-4 py-2 bg-white text-gray-600 border border-gray-200 rounded-full text-sm font-semibold hover:bg-gray-50 transition">Novos</button>
+                    <button class="px-4 py-2 bg-white text-gray-600 border border-gray-200 rounded-full text-sm font-semibold hover:bg-gray-50 transition">Em Preparo</button>
+                </div>
+            </div>
+
+            <div id="container-pedidos" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                </div>
+
+        </div>
+    </main>
+
+    <script>
+        // Dados simulados baseados no seu cardápio
+        let pedidos = [
+            {
+                id: "1042",
+                cliente: "Mariana Costa",
+                telefone: "(15) 99999-1111",
+                tempo: "Agora mesmo",
+                itens: [
+                    { nome: "Taça Sensação", qtd: 1, preco: 28.00 },
+                    { nome: "Casquinha Dupla", qtd: 2, preco: 12.00 }
+                ],
+                total: 52.00,
+                status: "novo" // novo, preparando, pronto
+            },
+            {
+                id: "1041",
+                cliente: "Carlos Eduardo",
+                telefone: "(15) 98888-2222",
+                tempo: "Há 5 min",
+                itens: [
+                    { nome: "Pote de 1 Litro (Chocolate)", qtd: 1, preco: 35.00 }
+                ],
+                total: 35.00,
+                status: "preparando"
+            },
+            {
+                id: "1040",
+                cliente: "Ana Julia",
+                telefone: "(15) 97777-3333",
+                tempo: "Há 12 min",
+                itens: [
+                    { nome: "Banana Split Clássica", qtd: 1, preco: 32.00 },
+                    { nome: "Casquinha Dupla", qtd: 1, preco: 12.00 }
+                ],
+                total: 44.00,
+                status: "pronto"
+            }
+        ];
+
+        // Função para formatar moeda
+        const formatarMoeda = (valor) => {
+            return `R$ ${valor.toFixed(2).replace('.', ',')}`;
+        };
+
+        // Função para retornar as cores e textos baseados no status
+        const getStatusConfig = (status) => {
+            switch(status) {
+                case 'novo':
+                    return {
+                        badgeClass: 'bg-red-100 text-red-700',
+                        badgeText: 'Novo Pedido',
+                        btnClass: 'bg-menta-claro text-white hover:bg-menta-escuro',
+                        btnText: 'Aceitar e Preparar'
+                    };
+                case 'preparando':
+                    return {
+                        badgeClass: 'bg-yellow-100 text-yellow-700',
+                        badgeText: 'Em Preparo',
+                        btnClass: 'bg-gray-800 text-white hover:bg-gray-900',
+                        btnText: 'Marcar como Pronto'
+                    };
+                case 'pronto':
+                    return {
+                        badgeClass: 'bg-green-100 text-green-700',
+                        badgeText: 'Pronto p/ Retirada',
+                        btnClass: 'bg-white border-2 border-gray-200 text-gray-500 hover:bg-gray-50',
+                        btnText: 'Finalizar / Entregue'
+                    };
+                default:
+                    return {};
+            }
+        };
+
+        // Renderizar os pedidos na tela
+        function renderizarPedidos() {
+            const container = document.getElementById('container-pedidos');
+            container.innerHTML = '';
+
+            pedidos.forEach((pedido, index) => {
+                const config = getStatusConfig(pedido.status);
+                
+                // Montar a lista de itens do pedido
+                let itensHTML = '';
+                pedido.itens.forEach(item => {
+                    itensHTML += `
+                        <div class="flex justify-between text-sm mb-2 border-b border-gray-50 pb-2">
+                            <span class="text-gray-600 font-medium"><span class="text-menta-texto font-bold">${item.qtd}x</span> ${item.nome}</span>
+                        </div>
+                    `;
+                });
+
+                // Criar o Card
+                const card = document.createElement('div');
+                card.className = 'bg-white rounded-xl p-5 card-shadow border border-gray-100 flex flex-col transition-all hover:shadow-lg';
+                
+                card.innerHTML = `
+                    <div class="flex justify-between items-start mb-4">
+                        <div>
+                            <h3 class="font-bold text-lg text-gray-800">Pedido #${pedido.id}</h3>
+                            <p class="text-xs text-gray-400 mt-1">${pedido.tempo}</p>
+                        </div>
+                        <span class="px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider ${config.badgeClass}">
+                            ${config.badgeText}
+                        </span>
+                    </div>
+
+                    <div class="mb-4 bg-gray-50 p-3 rounded-lg">
+                        <p class="text-sm font-semibold text-gray-700">${pedido.cliente}</p>
+                        <p class="text-xs text-gray-500">${pedido.telefone}</p>
+                    </div>
+
+                    <div class="flex-1 mb-4">
+                        <h4 class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-3">Itens do Pedido</h4>
+                        ${itensHTML}
+                    </div>
+
+                    <div class="mt-auto pt-4 border-t border-gray-100">
+                        <div class="flex justify-between items-center mb-4">
+                            <span class="text-sm text-gray-500 font-medium">Total a receber:</span>
+                            <span class="text-lg font-bold text-menta-texto">${formatarMoeda(pedido.total)}</span>
+                        </div>
+                        
+                        <button onclick="avancarStatus(${index})" class="w-full py-3 rounded-lg font-bold transition-colors duration-200 ${config.btnClass}">
+                            ${config.btnText}
+                        </button>
+                    </div>
+                `;
+                
+                container.appendChild(card);
+            });
+        }
+
+        // Lógica para avançar o status do pedido ao clicar no botão
+        window.avancarStatus = function(index) {
+            const pedido = pedidos[index];
+            
+            if(pedido.status === 'novo') {
+                pedido.status = 'preparando';
+            } else if (pedido.status === 'preparando') {
+                pedido.status = 'pronto';
+            } else if (pedido.status === 'pronto') {
+                // Remove da tela de andamento (simulando finalização)
+                pedidos.splice(index, 1); 
+            }
+            
+            renderizarPedidos();
+        }
+
+        // Inicializar
+        renderizarPedidos();
+    </script>
+</body>
+</html>
